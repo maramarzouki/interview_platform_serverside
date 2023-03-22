@@ -25,6 +25,13 @@ exports.get_all_companies = async (req,res) => {
     })
 }
 
+exports.update_company = async (req,res) => {
+    const updates = req.body;
+    await Company.updateOne({recruiter:req.params.recruiterID},{$set:updates})
+    .then(() => res.status(200).send("Company has been successfully updated!"))
+    .catch(err=>{res.status(500).send(err)})
+}
+
 exports.delete_company = async (req,res) => {
     await Company.findOne({name:req.body.name}).
     then(company=>{
