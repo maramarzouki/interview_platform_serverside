@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const company_schema = mongoose.Schema({
-    name:{
+    company_name:{
         type:String,
         required:true,
         unique:true
@@ -20,9 +20,10 @@ const company_schema = mongoose.Schema({
     },
     recruiter:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'recruiter'
+        ref:'Recruiters',
+        // default:mongoose.Types.ObjectId('507f1f77bcf86cd799439022')
     }
 })
 
-const companyModel = mongoose.model('company',company_schema);
+const companyModel = mongoose.model('Company',company_schema);
 module.exports = companyModel;

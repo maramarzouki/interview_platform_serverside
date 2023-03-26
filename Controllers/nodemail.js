@@ -3,8 +3,8 @@ const nodemailer = require('nodemailer');
 let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     auth: {
-      user: "maramyoona123@gmail.com", // generated ethereal user
-      pass: "vxnnpvgckcubuiza", // generated ethereal password
+      user: "hackup.ip@gmail.com", // generated ethereal user
+      pass: "ihyggjfsohponfgs", // generated ethereal password
     },
   });
 

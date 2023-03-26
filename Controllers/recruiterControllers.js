@@ -1,57 +1,35 @@
 const Recruiter = require('../Models/Recruiter');
+const Company = require('../Models/Company')
 const jwt = require('jsonwebtoken');
 const prv_key="njenbenvejzjfnzo";
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const { sendVerificationEmail, sendResetPasswordEmail } = require('../Controllers/nodemail');
-const { findOne } = require('../Models/Recruiter');
-const axios = require("axios").default;
-const secret_key = ""
+
 
 const create_token = (_id) => {
     return jwt.sign({_id},prv_key);
 }
 
 exports.add_recruiter = async (req,res) => {
-    const {first_name,last_name,email,password} = req.body;
-
+    const {first_name,last_name,email,password,company_name,country,domain,size} = req.body;
     try{
-        // console.log(req.body);
         const newRec = await Recruiter.create_account(first_name,last_name,email,password)
         const token = create_token(newRec._id);
-        sendVerificationEmail(email,newRec.activationCode);
-        console.log(newRec);
-        res.status(200).json({token,new:true,msg:"A verification mail has been sent to your email, please verify your email to login!",newRec});
+        const newCompany = new Company({company_name,country,domain,size});
+        newCompany.recruiter=newRec._id;
+        console.log(newCompany._id);
+        newRec.company=newCompany._id;
+        if(newRec && newCompany){
+            newRec.save();
+            newCompany.save();
+            sendVerificationEmail(email,newRec.activationCode);
+            res.status(200).json({token,msg:"A verification mail has been sent to your email, please verify your email to login!",newRec,newCompany});
+        }
     }catch(err){
         res.status(400).send({err:err.message})
     }
 }
 
-// exports.add_recruiter = async (req,res) => {
-//     //const {first_name,last_name,email,password,company:{name,size,country,domain}} = req.body;
-
-//     try{
-//         const recaptchaValue = req.body.recaptcha_value
-//         axios({
-//             url:`https://www.google.com/recaptcha/api/siteverify?secret=${secret_key}&response=${recaptchaValue}`,
-//             method:'POST'
-//         }).then(async ({data})=>{
-//             console.log(data);
-
-//             if(data.success){
-//                 const newRec = await Recruiter.create_account(req.body)
-//                 const token = create_token(newRec._id);
-//                 res.status(200).json({token,new:true});
-//             }else{
-//                 res.status(400).send("Recaptcha verification failed")
-//             }
-//         }).catch(err=>{
-//             res.status(400).send(err)
-//         })
-//     }catch(err){
-//         res.status(400).send({err:err.message})
-//     }
-// }
 
 exports.login_recruiter = async (req,res) => {
     const {email,password} = req.body;
@@ -79,6 +57,7 @@ exports.verify_recru = async (req,res) => {
         res.status(400).send(err)
     })
 }
+
 exports.get_recruiter_info = async (req,res) => {
     await Recruiter.findById({_id:req.params.recruiterID})
     .then((recruiter) => {

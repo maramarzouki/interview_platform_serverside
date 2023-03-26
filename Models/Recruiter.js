@@ -38,7 +38,8 @@ const recruiter_schema = mongoose.Schema({
     },
     company:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'company'
+        ref:'Company'
+        // default:mongoose.Types.ObjectId('507f1f77bcf86cd799439011')
     }
 })
 

@@ -1,17 +1,29 @@
 const Company = require('../Models/Company');
 
-exports.add_company = async (req,res) => {
-    await Company.findOne({name:req.body.name}).
-    then(company=>{
-        if(company){
-            res.status(400).send("This company alread exists")
+// exports.add_company = async (req,res) => {
+//     const {company_name,country,size,domain} = req.body
+//     await Company.findOne({name:req.body.name}).
+//     then(company=>{
+//         if(company){
+//             res.status(400).send("This company alread exists")
+//         }
+//         const new_company=new Company({name:company_name,country,size,domain});
+//         new_company.save();
+//         console.log(new_company);
+//         res.status(200).send({msg:"company saved",new_company})
+//     }).catch(err => {
+//         res.status(500).send(err);
+//     }) 
+// }
+
+exports.get_company = async(req,res) => {
+    await Company.findOne({recruiter:req.params.recruiterID})
+    .then(company=>{
+        if(!company){
+            res.status(500).send("Company not found")
         }
-        const new_company=new Company(req.body);
-        new_company.save();
-        res.status(200).send({msg:"company saved",new_company})
-    }).catch(err => {
-        res.status(500).send(err);
-    }) 
+        res.status(200).send(company);
+    })
 }
 
 exports.get_all_companies = async (req,res) => {
