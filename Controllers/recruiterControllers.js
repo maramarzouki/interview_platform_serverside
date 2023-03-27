@@ -13,18 +13,21 @@ const create_token = (_id) => {
 exports.add_recruiter = async (req,res) => {
     const {first_name,last_name,email,password,company_name,country,domain,size} = req.body;
     try{
-        const newRec = await Recruiter.create_account(first_name,last_name,email,password)
-        const token = create_token(newRec._id);
-        const newCompany = new Company({company_name,country,domain,size});
-        newCompany.recruiter=newRec._id;
-        console.log(newCompany._id);
-        newRec.company=newCompany._id;
-        if(newRec && newCompany){
-            newRec.save();
-            newCompany.save();
-            sendVerificationEmail(email,newRec.activationCode);
-            res.status(200).json({token,msg:"A verification mail has been sent to your email, please verify your email to login!",newRec,newCompany});
-        }
+        await Company.findOne({company_name:req.body.company_name}).then(async company=>{
+            if(company){
+                res.status(500).send({err:"This company already exists!"})
+            }else{
+                const newRec = await Recruiter.create_account(first_name,last_name,email,password)
+                const token = create_token(newRec._id);
+                const newCompany = new Company({company_name,country,domain,size});
+                newCompany.recruiter=newRec._id;
+                newRec.company=newCompany._id;
+                newRec.save();
+                newCompany.save();
+                sendVerificationEmail(email,newRec.activationCode);
+                res.status(200).json({token,msg:"A verification mail has been sent to your email, please verify your email to login!",newRec,newCompany});
+            }
+        })
     }catch(err){
         res.status(400).send({err:err.message})
     }
