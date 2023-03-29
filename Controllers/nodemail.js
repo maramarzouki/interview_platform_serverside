@@ -17,10 +17,11 @@ let transporter = nodemailer.createTransport({
             subject: "Confirmation Email", // Subject line
             //text: "Click the following button to confirm your email!", // plain text body
             html: `
-            Hello ${username}
-            
-            You registered an account on platform, before being able to use your account you need to verify that this is your email address by clicking here: ${link}
-            
+            Hello, ${username}
+            <br/><br/>
+            You registered an account on platform,
+            before being able to use your account you need to verify that this is your email address by clicking here: <a href=${link}>${link}</a>
+            <br/><br/>
             Kind Regards, HackUp`, // html body
           }, (err,info) => {
             if(err){
@@ -41,17 +42,16 @@ try{
           text: "Click the following button to reset your password!", // plain text body
           html: `
           Trouble signing in?
-          
+          <br/><br/>
           Resetting your password is easy.
-          
-          Just press the button below and follow the instructions. We’ll have you up and running in no time.
-          <button><a href=${link}>Reset Password</a></button>
-          
-          If you did not make this request then please ignore this email.
+          <br/><br/>
+          Just click on this <a href=${link}>link</a> and follow the instructions.We’ll have you up and running in no time.
+          <br/>
+          <br/> If you did not make this request then please ignore this email.
           `, // html body
         }, (err,info) => {
           if(err){
-              console.log(err)
+              console.log(err) 
           }else{
               console.log("email sent", info.response)
           }

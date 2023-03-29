@@ -44,15 +44,15 @@ exports.update_company = async (req,res) => {
     .catch(err=>{res.status(500).send(err)})
 }
 
-exports.delete_company = async (req,res) => {
-    await Company.findOne({name:req.body.name}).
-    then(company=>{
-        if(!company){
-            res.status(404).send("This company doesn't exist")
-        }
-        company.remove();
-        res.status(200).send("Company removed")
-    }).catch(err=>{
-        res.status(500).send(err); 
-    })
-}
+// exports.delete_company = async (req,res) => {
+//     await Company.findOne({name:req.body.name}).
+//     then(company=>{
+//         if(!company){
+//             res.status(404).send("This company doesn't exist")
+//         }
+//         company.remove();
+//         res.status(200).send("Company removed")
+//     }).catch(err=>{
+//         res.status(500).send(err); 
+//     })
+// }

@@ -24,7 +24,7 @@ exports.add_recruiter = async (req,res) => {
                 newRec.company=newCompany._id;
                 newRec.save();
                 newCompany.save();
-                sendVerificationEmail(email,newRec.activationCode);
+                sendVerificationEmail(email,newRec.activationCode,newRec.first_name);
                 res.status(200).json({token,msg:"A verification mail has been sent to your email, please verify your email to login!",newRec,newCompany});
             }
         })
@@ -75,7 +75,7 @@ exports.get_all_recruiters = async (req,res) => {
     .then(recu_list => {
         res.status(200).send(recu_list)
     }).catch(err=>{
-        res.status(400).send('ERROR:',err)
+        res.status(400).send(err)
     })
 }
 
@@ -104,10 +104,14 @@ exports.update_recru = async (req, res) => {
 exports.delete_recru = (req,res) => {
     Recruiter.findById({_id:req.params.recruiterID}).
     then(recruiter=>{
-        recruiter.remove();
-        res.status(200).send('account deleted!')
+        Company.findOne({recruiter:req.params.recruiterID})
+        .then(company=>{
+            company.remove();
+            recruiter.remove();
+            res.status(200).send('account deleted!')
+        })
     }).catch(err=>{
-        res.status(400).send('ERROR:',err);
+        res.status(400).send(err);
     })
 }
  
@@ -159,8 +163,6 @@ exports.forgot_passowrd = async (req,res) => {
 
 exports.resetPASSWORD = async (req,res) => {
     try{
-        // const input =req.body;
-        // const {userID, token} = req.params
         const user = await Recruiter.findOne({_id: req.params.userID})
         if(!user){
             throw Error("User is not found")
