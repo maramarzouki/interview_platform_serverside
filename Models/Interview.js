@@ -26,6 +26,10 @@ const interview_schema = mongoose.Schema({
     end_hour:{
         type:String,
     },
+    status:{
+        type:String,
+        default:"Not started"
+    },
     link:{
         type:String,
         required:true

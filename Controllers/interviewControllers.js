@@ -13,7 +13,7 @@ exports.add_interview = async (req,res) =>{
         }
         const link_title = title.replace(/ /g,"-");
         const interview_link=`http://localhost:3001/${link_title}/${forpath}`;
-        const day=dayjs(date).format('MM/DD/YYYY');
+        const day=dayjs(date).format('DD/MM/YYYY');
         const data = {title,candidate_email,date:day,start_hour,end_hour,link:interview_link,recruiter}
         const new_interview = await Interview.create(data);
         res.status(200).send(new_interview);
@@ -91,7 +91,40 @@ exports.get_today_interviews = async (req,res) => {
     }
 }
 
-// 
+exports.update_interview = async (req,res) => {
+    try {
+        const updates = req.body;
+        if(req.body.date){
+            req.body.date=dayjs(req.body.date).format('MM/DD/YYYY');
+        }
+        const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        forpath="";
+        for(let i=0;i<30;i++){
+            forpath+=chars[Math.floor(Math.random()*chars.length)];
+        }
+        if(req.body.title){
+            await Interview.updateOne({_id:req.params.interviewID , $set:updates})
+            .then(async (result)=>{ 
+                if(result){
+                    const interview_link=`http://localhost:3001/${req.body.title.replace(/ /g,"-")}/${forpath}`;
+                    await Interview.updateOne({_id:req.params.interviewID, $set:{link:interview_link}})
+                    .then(()=>{res.status(200).send("Interview is updated!")})
+                }
+            }).catch(err=>{
+                res.status(404).send({err:err.message});
+            }) 
+        }else{
+            await Interview.updateOne({_id:req.params.interviewID , $set:updates})
+            .then(()=>{ 
+                res.status(200).send("Interview is updated!")
+            }).catch(err=>{
+                res.status(404).send({err:err.message});
+            }) 
+        }
+    } catch (error) {
+        res.status(500).send({err:error.message})
+    }
+}
 
 exports.delete_interview = async (req,res) => {
     try {
