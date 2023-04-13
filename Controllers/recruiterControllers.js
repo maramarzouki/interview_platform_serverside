@@ -17,9 +17,11 @@ exports.add_recruiter = async (req,res) => {
             if(company){
                 res.status(500).send({err:"This company already exists!"})
             }else{
-                const newRec = await Recruiter.create_account(first_name,last_name,email,password)
-                const token = create_token(newRec._id);
-                const newCompany = new Company({company_name,country,domain,size});
+                const newCompany = await Company.create({company_name,country,domain,size});
+                if(newCompany){
+                    newRec = await Recruiter.create_account(first_name,last_name,email,password)
+                    token = create_token(newRec._id);
+                }
                 newCompany.recruiter=newRec._id;
                 newRec.company=newCompany._id;
                 newRec.save();

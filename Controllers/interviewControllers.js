@@ -28,17 +28,9 @@ exports.notify_candidate= async (req,res)=>{
         .populate('company')
         .then(async (interviewer)=>{
             rec_name=interviewer.first_name+" "+interviewer.last_name;
-            company_name=interviewer.company.company_name;
-            await Interview.findOne({link:req.body.link})
-            .then((interview)=>{
-                interview_link=interview.link;
-                candidate_email=interview.candidate_email;
-                interview_date=interview.date;
-                interview_hour=interview.start_hour;
-            })
-        })
-        email_candidate(interview_link,candidate_email,rec_name,company_name,interview_date,interview_hour);
-    }catch(err){}
+            company_name=interviewer.company.company_name;})
+        email_candidate(req.body.link,req.body.candidate_email,rec_name,company_name,req.body.date,req.body.start_hour);
+     }catch(err){}
 }
 
 exports.get_interview_details = async (req,res) => {
@@ -76,14 +68,17 @@ exports.get_today_interviews = async (req,res) => {
         const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
         let today = weekday[date.getDay()];
 
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        let m = months[date.getMonth()];
+
         let interviews=await Interview.find({recruiter:req.params.recruiterID, date:currentDate})
         if(interviews.length!=0){
             let dInterviews=interviews.map(el=>{
-                return {title:el.title,weekday:today,date:el.date,start_hour:el.start_hour,end_hour:el.end_hour}
+                return {title:el.title,weekday:today,month:m,day:day,year:year,start_hour:el.start_hour,end_hour:el.end_hour}
             })
             res.status(200).send(dInterviews);
         }else{
-            res.status(404).send("No interviews for today!")
+            res.status(200).send("No interviews for today!")
         }
         interviews.forEach
     } catch (err) {

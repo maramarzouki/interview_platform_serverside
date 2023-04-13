@@ -32,10 +32,6 @@ const recruiter_schema = mongoose.Schema({
     activationCode:{
         type:String,
     },
-    disabled:{
-        type:Boolean,
-        default:true
-    },
     company:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Company' 
