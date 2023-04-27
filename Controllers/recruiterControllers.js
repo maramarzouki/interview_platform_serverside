@@ -53,7 +53,7 @@ exports.verify_recru = async (req,res) => {
     await Recruiter.findOne({activationCode:req.params.activationCode}).
     then(user=>{
         if(!user){
-            res.status(400).send("activation code not found")
+            res.status(404).send("activation code not found")
         }
         user.isActive=true;
         user.save();
@@ -66,7 +66,11 @@ exports.verify_recru = async (req,res) => {
 exports.get_recruiter_info = async (req,res) => {
     await Recruiter.findById({_id:req.params.recruiterID})
     .then((recruiter) => {
-         res.status(200).send(recruiter);
+        if(recruiter){
+            res.status(200).send(recruiter);
+        }else{
+            res.status(404).send("recruiter doesn't exist");
+        }
     }).catch(err=>{
         res.status(400).send({err:err.message});
     })
@@ -74,32 +78,47 @@ exports.get_recruiter_info = async (req,res) => {
 
 exports.get_all_recruiters = async (req,res) => {
     await Recruiter.find({})
-    .then(recu_list => {
-        res.status(200).send(recu_list)
+    .then(recru_list => {
+        if(recru_list){
+            res.status(200).send(recru_list)
+        }else{
+            res.status(404).send("recruiters' list is empty")
+        }
     }).catch(err=>{
-        res.status(400).send(err)
+        res.status(500).send(err)
     })
 }
 
 exports.update_recru = async (req, res) => {
-    const updates = req.body;
-    if(req.body.password){
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(req.body.password,salt);
-        req.body.password=hash;
-        await Recruiter.updateOne({_id:req.params.recruiterID},{$set:updates})
-        .then(result=>{
-            res.status(200).send(result)
-        }).catch(err=>{
-            res.status(200).send(err)
+    try{
+        const updates = req.body;
+        await Recruiter.findOne({_id:req.params.recruiterID})
+        .then(async recruiter=>{
+            if(recruiter){
+                if(req.body.password){
+                    const salt = await bcrypt.genSalt(10);
+                    const hash = await bcrypt.hash(req.body.password,salt);
+                    req.body.password=hash;
+                    await Recruiter.updateOne({_id:req.params.recruiterID},{$set:updates})
+                    .then(result=>{
+                        res.status(200).send(result)
+                    }).catch(err=>{
+                        res.status(200).send(err)
+                    })
+                }else{
+                    await Recruiter.updateOne({_id:req.params.recruiterID},{$set:updates}).
+                    then(result => {
+                        res.status(200).send(result)
+                    }).catch(err=>{
+                       res.status(200).send(err)
+                    })
+                }
+            }else{
+                res.status(404).send("recruiter doesn't exist");
+            }
         })
-    }else{
-        await Recruiter.updateOne({_id:req.params.recruiterID},{$set:updates}).
-        then(result => {
-            res.status(200).send(result)
-        }).catch(err=>{
-           res.status(200).send(err)
-        })
+    }catch(err){
+        res.status(500).send({err:err.message})
     }
 }
 
@@ -123,45 +142,10 @@ exports.forgot_passowrd = async (req,res) => {
         if(!user) {
             throw Error ("user doesn't exist");
         }
-        //const token = jwt.sign({email: user.email, id:user._id}, prv_key, {expiresIn: "5m"})
+        // const token = jwt.sign({email: user.email, id:user._id}, prv_key, {expiresIn: "5m"})
         const userID = user._id;
         sendResetPasswordEmail(email,userID);
 }
-
-// exports.reset_password = async (req,res) => {
-//     const {userID, token} = req.params
-//     const user = await Recruiter.findById({_id:userID})
-//     const link = `http://localhost:3001/resetpassword/${userID}/${token}`
-//     try{
-//         let transporter = nodemailer.createTransport({
-//           host: "smtp.gmail.com",
-//           auth: {
-//             user: "maramyoona123@gmail.com", // generated ethereal user
-//             pass: "vxnnpvgckcubuiza", // generated ethereal password
-//           },
-//         });
-
-//     transporter.sendMail({
-//         from: 'hackup.io', // sender address
-//         to: user.email,// list of receivers
-//         subject: "Reset Password", // Subject line
-//         text: "Reset your password by clicking the following button!", // plain text body
-//         html: `<button><a href=${link}/> click me</button>`, // html body
-//       }, (err,info) => {
-//         if(err){
-//             console.log(err)
-//         }else{
-//             console.log("email sent", info.response)
-//         }
-//       });
-
-//     }catch(err){
-//         res.status(400).send(err.message)
-//     }
-// }
-
-// exports.reset_password_request = (req, res) => {
-// }
 
 exports.resetPASSWORD = async (req,res) => {
     try{
@@ -179,6 +163,8 @@ exports.resetPASSWORD = async (req,res) => {
         }).catch(err=>{
             res.status(400).send(err)
         })
-    }catch(err){}
+    }catch(err){
+        res.status(500).send({err:err.message})
+    }
 }
 

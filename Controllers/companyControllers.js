@@ -17,31 +17,45 @@ const Company = require('../Models/Company');
 // }
 
 exports.get_company = async(req,res) => {
-    await Company.findOne({recruiter:req.params.recruiterID})
-    .then(company=>{
-        if(!company){
-            res.status(500).send("Company not found")
-        }
-        res.status(200).send(company);
-    })
+    try{
+        await Company.findOne({recruiter:req.params.recruiterID})
+        .then(company=>{
+            if(!company){
+                res.status(500).send("Company not found")
+            }
+            res.status(200).send(company);
+        })
+    }catch(err){
+        res.status(500).send({err:err.message})
+    }
 }
 
 exports.get_all_companies = async (req,res) => {
-    await Company.find({}).then(companies=>{
-        if(!companies){
-            res.status(404).send("No company found!")
-        }
-        res.status(200).send(companies);
-    }).catch(err=>{
-        res.status(500).send(err);  
-    })
+    try{
+        await Company.find({}).then(companies=>{
+            if(!companies){
+                res.status(404).send("No company found!")
+            }
+            res.status(200).send(companies);
+        }).catch(err=>{
+            res.status(500).send(err);  
+        })
+    }catch{
+        res.status(500).send({err:err.message})
+    }
 }
 
 exports.update_company = async (req,res) => {
-    const updates = req.body;
-    await Company.updateOne({recruiter:req.params.recruiterID},{$set:updates})
-    .then(() => res.status(200).send("Company has been successfully updated!"))
-    .catch(err=>{res.status(500).send(err)})
+    try{
+        await Company.find({recruiter:req.params.recruiterID},{$set:updates}).then(companies=>{
+            if(!companies){
+                res.status(404).send("No company found!")
+            }
+            res.status(200).send(companies);
+        })
+    }catch(err){
+        res.status(500).send({err:err.message})
+    }
 }
 
 // exports.delete_company = async (req,res) => {
