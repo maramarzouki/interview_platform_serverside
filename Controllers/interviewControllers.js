@@ -40,6 +40,7 @@ exports.notify_candidate= async (req,res)=>{
             rec_name=interviewer.first_name+" "+interviewer.last_name;
             company_name=interviewer.company.company_name;})
         email_candidate(req.body.link,req.body.candidate_email,rec_name,company_name,req.body.date,req.body.start_hour);
+        res.status(200).send({message:"email sent"});
      }catch(err){}
 }
 

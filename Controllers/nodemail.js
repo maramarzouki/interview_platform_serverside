@@ -63,6 +63,11 @@ try{
         transporter.sendMail({
             from: 'hackup.io', // sender address
             to: candidate_email,// list of receivers
+            attachments: [{
+              filename: 'Frame.png',
+              path: "C:\Users\MARAM\Downloads\image (1).png",
+              cid: 'unique@nodemailer.com' //same cid value as in the html img src
+          }],
             subject: `Interview with ${company_name}`, // Subject line 
             html: `<div style="background-color: white; width: 100%;">
             <div style="width: 500px; margin-left: 25%; height: 415px; border-radius: 20px; background-color: rgb(249, 249, 249); box-shadow: rgba(0, 0, 0, 0.25) 0px 3px 8px;  padding-top: 70px;">
